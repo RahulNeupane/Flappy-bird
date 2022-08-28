@@ -1,11 +1,10 @@
-import Phaser from "phaser";
+import BaseScene from "./BaseScene";
 
 const PIPES_TO_RENDER = 4;
-class PlayScene extends Phaser.Scene{
+class PlayScene extends BaseScene{
     
     constructor(config){
-        super('PlayScene');
-        this.config = config;
+        super('PlayScene',config);
 
         this.bird = null;
         this.pipes = null;
@@ -17,26 +16,19 @@ class PlayScene extends Phaser.Scene{
         this.score = 0;
         this.scoreText = '';
     }
-    preload(){
-        this.load.image('sky','assets/sky.png');
-        this.load.image('bird', 'assets/bird.png');
-        this.load.image('pipe', 'assets/pipe.png');
-    }
+
     create(){
-        this.createBG();
+        super.create();
         this.createBird();
         this.createPipes();
         this.createColiders();
         this.createScore();
-        this.handleInputs();      
+        this.createPause();    
+        this.handleInputs();
     }
     update(){
         this.checkGameStatus();
         this.recyclePipe();
-    }
-
-    createBG(){
-        this.add.image(0, 0, 'sky').setOrigin(0);
     }
 
     createBird(){
@@ -69,10 +61,24 @@ class PlayScene extends Phaser.Scene{
         this.add.text(16, 52,`Best Score:${bestScore || 0}`, {fontSize: '15px', fill: '#000'});
     }
 
+    createPause(){
+        const pauseBtn =  this.add.image(this.config.width-10,this.config.height-10,'pause').setScale(3).setInteractive().setOrigin(1);
+
+
+
+        pauseBtn.on('pointerdown',()=>{
+            this.physics.pause();
+            this.scene.pause();
+            
+        })
+    }
+
     handleInputs(){
         this.input.on('pointerdown',this.flap, this);
         this.input.keyboard.on('keydown_SPACE',this.flap, this);
     }
+
+  
 
     checkGameStatus(){
         if(this.bird.getBounds().bottom >= this.config.height || this.bird.y <=0){
